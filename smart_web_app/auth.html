@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart System | Login</title>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0GiwHfzycvg-cAznYMjgNvz-WYEBPxZU",
+      authDomain: "soil-moisture-data-5fcea.firebaseapp.com",
+      databaseURL: "https://soil-moisture-data-5fcea-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "soil-moisture-data-5fcea",
+      storageBucket: "soil-moisture-data-5fcea.appspot.com",
+      messagingSenderId: "236391102936",
+      appId: "1:236391102936:web:b9390b0043d1a7cf749aad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) window.location.href = "dashboard_with_camera.html";
+    });
+
+    window.login = async function() {
+      const email = document.getElementById("email").value;
+      const pass = document.getElementById("password").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        document.body.classList.add("fade-out");
+        setTimeout(() => window.location.href = "dashboard_with_camera.html", 600);
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+
+    window.signup = async function() {
+      const email = document.getElementById("email").value;
+      const pass = document.getElementById("password").value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        document.body.classList.add("fade-out");
+        setTimeout(() => window.location.href = "dashboard_with_camera.html", 600);
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: "Inter", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: linear-gradient(180deg, #0b1324, #111c3d);
+      position: relative;
+    }
+
+    /* ===== Animated Blurred Robot Background ===== */
+    .bg-robot {
+      position: absolute;
+      inset: 0;
+      background: url("image.png") center/cover no-repeat;
+      filter: blur(25px) brightness(0.8);
+      transform: scale(1.1);
+      animation: moveBackground 18s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+
+    @keyframes moveBackground {
+      0% { transform: scale(1.1) translateX(0) translateY(0); }
+      50% { transform: scale(1.15) translateX(-2%) translateY(-2%); }
+      100% { transform: scale(1.1) translateX(2%) translateY(2%); }
+    }
+
+    /* Overlay dark tint */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 60% 30%, rgba(99,102,241,0.2), rgba(0,0,0,0.75));
+      z-index: 1;
+    }
+
+    /* ===== Foreground Text (like home background) ===== */
+    .home-bg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #e2e8f0;
+      animation: zoomIn 1.5s ease forwards;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .home-bg h1 {
+      font-size: 2.3rem;
+      background: linear-gradient(90deg, #22d3ee, #6366f1);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+
+    .home-bg p {
+      color: #cbd5e1;
+      max-width: 480px;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+
+    /* ===== Login Card ===== */
+    .card {
+      position: relative;
+      z-index: 3;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      width: 320px;
+      text-align: center;
+      animation: fadeInUp 1s ease;
+      backdrop-filter: blur(10px);
+    }
+    .card h2 {
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #22d3ee, #6366f1);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(90deg,#22d3ee,#6366f1);
+      color: #0b1324;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    /* ===== Animations ===== */
+    @keyframes zoomIn {
+      from { transform: scale(1.05); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-out {
+      animation: fadeOut 0.6s ease forwards;
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; transform: scale(1.05); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Animated blurred robot background -->
+  <div class="bg-robot"></div>
+  <div class="overlay"></div>
+
+  <!-- Home-style heading -->
+  <div class="home-bg">
+    <h1>Smart System Control</h1>
+    <p>Monitor soil sensors, control irrigation robots, and view AI camera data seamlessly.</p>
+  </div>
+
+  <!-- Login Form -->
+  <div class="card">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <button onclick="window.location.href='signup.html'">Sign Up</button>
+  </div>
+</body>
+</html>

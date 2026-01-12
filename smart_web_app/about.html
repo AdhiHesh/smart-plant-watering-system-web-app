@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About — Smart System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg1: #0b1324;
+      --bg2: #111c3d;
+      --accent1: #22d3ee;
+      --accent2: #6366f1;
+      --fg: #e2e8f0;
+      --muted: #94a3b8;
+      --card-bg: rgba(15,23,42,0.6);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: radial-gradient(circle at 80% 20%, rgba(99,102,241,0.18), transparent 50%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      color: var(--fg);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* NAVBAR (same look as home) */
+    nav {
+      background: rgba(15,23,42,0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(148,163,184,0.12);
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-left { font-weight: 800; color: var(--fg); font-size: 1.05rem; }
+    .nav-center { display: flex; gap: 20px; justify-content: center; flex: 1; }
+    .nav-center a { color: var(--accent1); text-decoration: none; font-weight: 600; }
+    .nav-center a:hover { color: var(--accent2); }
+    .nav-right a {
+      color: #0b1324;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .menu-toggle { display: none; cursor: pointer; gap: 5px; }
+    .menu-toggle span { width: 26px; height: 3px; background: var(--accent1); border-radius: 2px; display:block; }
+
+    .mobile-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      right: 0;
+      background: rgba(10,14,25,0.95);
+      padding: 18px;
+      flex-direction: column;
+      gap: 12px;
+      border-top: 1px solid rgba(148,163,184,0.12);
+      align-items: center;
+    }
+    .mobile-menu a { color: var(--accent1); text-decoration: none; font-weight: 600; }
+
+    .mobile-active { display: flex; animation: fadeIn .2s ease; }
+
+    @keyframes fadeIn { from { opacity:0; transform: translateY(-8px);} to {opacity:1; transform:none;} }
+
+    /* PAGE HERO */
+    .page-hero {
+      padding: 56px 20px 10px;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      text-align: left;
+    }
+
+    .hero-left {
+      max-width: 680px;
+      animation: fadeInUp 0.9s ease;
+    }
+
+    .hero-left h1 {
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-left p { color: #cbd5e1; line-height: 1.6; margin: 0 0 18px 0; }
+
+    .hero-cta { display:flex; gap:12px; flex-wrap: wrap; }
+
+    .btn {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      color: #0b1324;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .secondary {
+      background: transparent;
+      border: 1px solid rgba(148,163,184,0.12);
+      color: var(--muted);
+      padding: 10px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .hero-right img {
+      width: 360px;
+      max-width: 90%;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(34,211,238,0.06);
+      filter: drop-shadow(0 6px 24px rgba(34,211,238,0.06));
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px);} to {opacity:1; transform:none;} }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+    /* CONTENT SECTIONS */
+    .container {
+      width: min(1100px, 94%);
+      margin: 28px auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      border: 1px solid rgba(148,163,184,0.06);
+      padding: 18px;
+      border-radius: 12px;
+      color: #cbd5e1;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .feature {
+      padding: 16px;
+      border-radius: 10px;
+      background: var(--card-bg);
+      text-align: left;
+    }
+    .feature h4 { margin: 0 0 8px 0; color: var(--accent1); }
+    .feature p { margin: 0; color: #a7b6cc; font-size: 0.95rem; }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .member {
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      padding: 14px;
+      border-radius: 10px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .avatar {
+      width:56px;height:56px;border-radius:12px;background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:#082033;
+      flex-shrink:0;
+    }
+    .member-info h5 { margin:0;color:var(--fg); }
+    .member-info p { margin:0;color:#9fb0c9;font-size:0.9rem; }
+
+    .timeline {
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .timeline .step {
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      background: rgba(255,255,255,0.02);
+      padding:12px;border-radius:10px;border:1px solid rgba(148,163,184,0.04);
+    }
+    .step .num {
+      width:34px;height:34px;border-radius:8px;background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:#071022;
+    }
+    .step .detail h5 { margin:0;color:var(--fg); }
+    .step .detail p { margin:6px 0 0 0;color:#9fb0c9;font-size:0.94rem; }
+
+    footer {
+      background: linear-gradient(90deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95));
+      border-top: 1px solid rgba(148,163,184,0.12);
+      color: #cbd5e1;
+      padding: 22px 20px;
+      text-align: center;
+      font-size: 14px;
+      margin-top: auto;
+    }
+
+    footer .copyright { color: var(--muted); font-size: 13px; }
+
+    /* Modal (logout) */
+    .modal {
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter: blur(4px);
+      align-items:center;justify-content:center;z-index:120;
+    }
+    .modal-content {
+      background:#0f172a;padding:24px;border-radius:12px;text-align:center;
+      box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 980px) {
+      .grid-3 { grid-template-columns: repeat(2,1fr); }
+      .team-grid { grid-template-columns: repeat(2,1fr); }
+      .hero-right img { width:300px; }
+    }
+    @media (max-width: 720px) {
+      .nav-center { display: none; }
+      .nav-right { display: none; }
+      .menu-toggle { display: flex; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .team-grid { grid-template-columns: 1fr; }
+      .page-hero { padding-top: 18px; }
+      .hero-right img { width: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav>
+    <div class="nav-left">Smart System</div>
+
+    <div class="nav-center" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+
+    <div class="nav-right" id="navAuth">
+      <a href="auth.html" id="loginBtn">Login</a>
+    </div>
+
+    <div class="menu-toggle" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="auth.html" id="mobileAuthLink">Login</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="page-hero">
+    <div class="hero-left">
+      <h1>About Smart System</h1>
+      <p>
+        Smart System simplifies precision farming by combining soil-moisture telemetry, automated irrigation robots,
+        and AI-powered camera analysis. Our goal is to help growers maximize yield while conserving water and time.
+      </p>
+      <div class="hero-cta">
+        <a class="btn" href="auth.html">Get Started</a>
+        <a class="secondary" href="contact.html">Contact Sales</a>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <img src="image.png" alt="Smart robot watering plant" />
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main class="container" role="main">
+    <!-- Features -->
+    <section class="card" aria-labelledby="featuresTitle">
+      <h3 id="featuresTitle" style="margin:0 0 12px 0; color:var(--accent1)">What we offer</h3>
+      <div class="grid-3" style="margin-top:12px;">
+        <div class="feature">
+          <h4>Real-time Monitoring</h4>
+          <p>Continuous soil moisture and environmental telemetry for informed irrigation decisions.</p>
+        </div>
+        <div class="feature">
+          <h4>Automated Irrigation</h4>
+          <p>Schedule and control irrigation robots to deliver water precisely where it's needed.</p>
+        </div>
+        <div class="feature">
+          <h4>AI Vision</h4>
+          <p>Camera-based plant health analysis and pest detection using lightweight AI models.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team -->
+    <section class="card" aria-labelledby="teamTitle">
+      <h3 id="teamTitle" style="margin:0 0 12px 0; color:var(--accent1)">Our Team</h3>
+      <p style="margin:8px 0 14px 0;color:#a9bdd3">Engineers and agronomists building scalable tools for sustainable agriculture.</p>
+      <div class="team-grid">
+        <div class="member">
+          <div class="avatar">AD</div>
+          <div class="member-info">
+            <h5>Adhithya</h5>
+            <p>Full-stack developer — frontend, Firebase auth & realtime sync.</p>
+          </div>
+        </div>
+        <div class="member">
+          <div class="avatar">SW</div>
+          <div class="member-info">
+            <h5>Sawandi</h5>
+            <p>Designer and AI researcher.</p>
+          </div>
+        </div>
+        <div class="member">
+          <div class="avatar">TM</div>
+          <div class="member-info">
+            <h5>Team</h5>
+            <p>Robotics — irrigation automation and embedded systems.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="card" aria-labelledby="howTitle">
+      <h3 id="howTitle" style="margin:0 0 12px 0; color:var(--accent1)">How it works</h3>
+      <div class="timeline" style="margin-top:8px;">
+        <div class="step">
+          <div class="num">1</div>
+          <div class="detail">
+            <h5>Data Collection</h5>
+            <p>Soil sensors and cameras stream telemetry and images to the cloud in real time.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="detail">
+            <h5>AI Analysis</h5>
+            <p>Edge or cloud models analyze imagery for plant stress, pests, and growth stage.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="detail">
+            <h5>Action</h5>
+            <p>Automated irrigation robots and scheduler trigger targeted watering based on rules.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Callout / Contact -->
+    <section class="card" aria-labelledby="callTitle">
+      <h3 id="callTitle" style="margin:0 0 12px 0; color:var(--accent1)">Want to learn more?</h3>
+      <p style="margin:0 0 12px 0;color:#a9bdd3">
+        Book a demo or explore the dashboard. We offer integration support for custom sensors and farm setups.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn" href="contact.html">Request</a>
+        <a class="secondary" href="dashboard_with_camera.html">Open Dashboard</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="copyright">
+      © 2025 Smart Plant Watering System Project — Powered by Firebase & AI Vision
+    </div>
+  </footer>
+
+  <!-- LOGOUT CONFIRM MODAL -->
+  <div class="modal" id="logoutModal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+      <h3 id="logoutTitle" style="color:var(--accent1);margin:0 0 8px 0">Confirm Logout</h3>
+      <p style="color:#cbd5e1;margin:0 0 16px 0">Are you sure you want to log out from Smart System?</p>
+      <div style="display:flex;justify-content:center;gap:8px;">
+        <button class="btn" id="confirmLogout">Yes, Logout</button>
+        <button class="secondary" id="cancelLogout">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Authentication -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0GiwHfzycvg-cAznYMjgNvz-WYEBPxZU",
+      authDomain: "soil-moisture-data-5fcea.firebaseapp.com",
+      databaseURL: "https://soil-moisture-data-5fcea-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "soil-moisture-data-5fcea",
+      storageBucket: "soil-moisture-data-5fcea.appspot.com",
+      messagingSenderId: "236391102936",
+      appId: "1:236391102936:web:b9390b0043d1a7cf749aad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loginBtn = document.getElementById("loginBtn");
+    const navLinks = document.getElementById("navLinks");
+    const mobileAuthLink = document.getElementById("mobileAuthLink");
+    const modal = document.getElementById("logoutModal");
+    const confirmLogout = document.getElementById("confirmLogout");
+    const cancelLogout = document.getElementById("cancelLogout");
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginBtn.textContent = "Logout";
+        loginBtn.href = "#";
+        loginBtn.onclick = () => { modal.style.display = "flex"; modal.setAttribute('aria-hidden','false'); };
+
+        mobileAuthLink.textContent = "Logout";
+        mobileAuthLink.href = "#";
+        mobileAuthLink.onclick = () => { modal.style.display = "flex"; modal.setAttribute('aria-hidden','false'); };
+
+        if (!document.getElementById("dashLink")) {
+          const dashLink = document.createElement("a");
+          dashLink.id = "dashLink";
+          dashLink.href = "dashboard_with_camera.html";
+          dashLink.textContent = "Dashboard";
+          navLinks.appendChild(dashLink);
+        }
+      } else {
+        loginBtn.textContent = "Login";
+        loginBtn.href = "auth.html";
+        loginBtn.onclick = null;
+
+        mobileAuthLink.textContent = "Login";
+        mobileAuthLink.href = "auth.html";
+        mobileAuthLink.onclick = null;
+
+        const dash = document.getElementById("dashLink");
+        if (dash) dash.remove();
+      }
+    });
+
+    confirmLogout.onclick = async () => {
+      await signOut(auth);
+      modal.style.display = "none";
+      modal.setAttribute('aria-hidden','true');
+      alert("You have successfully logged out.");
+    };
+
+    cancelLogout.onclick = () => {
+      modal.style.display = "none";
+      modal.setAttribute('aria-hidden','true');
+    };
+
+    window.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+        modal.setAttribute('aria-hidden','true');
+      }
+    });
+  </script>
+
+  <script>
+    const mobileMenu = document.getElementById("mobileMenu");
+    function toggleMenu() {
+      mobileMenu.classList.toggle("mobile-active");
+    }
+  </script>
+</body>
+</html>

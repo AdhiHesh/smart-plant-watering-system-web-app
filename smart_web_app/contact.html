@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contact — Smart System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg1: #0b1324;
+    --bg2: #111c3d;
+    --accent1: #22d3ee;
+    --accent2: #6366f1;
+    --fg: #e2e8f0;
+    --muted: #94a3b8;
+}
+* { box-sizing:border-box; }
+body { font-family:"Inter",sans-serif; background: radial-gradient(circle at 80% 20%, rgba(99,102,241,0.25), transparent 50%), linear-gradient(180deg,var(--bg1),var(--bg2)); color:var(--fg); margin:0; display:flex; flex-direction:column; min-height:100vh; }
+
+/* Navbar */
+nav { background: rgba(15,23,42,0.85); backdrop-filter:blur(10px); border-bottom:1px solid rgba(148,163,184,0.15); padding:14px 28px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:50;}
+.nav-left { font-weight:800; font-size:1.1rem; color:var(--fg);}
+.nav-center { display:flex; gap:22px; flex:1; justify-content:center; }
+.nav-center a, .nav-center .nav-link { text-decoration:none; font-weight:600; color:var(--accent1); transition:0.2s; }
+.nav-center a:hover, .nav-center .nav-link:hover { color: var(--accent2);}
+.nav-right a { text-decoration:none; font-weight:700; padding:8px 16px; border-radius:8px; background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#0b1324; transition:0.2s;}
+.nav-right a:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(99,102,241,0.5);}
+.menu-toggle { display:none; flex-direction:column; gap:5px; cursor:pointer;}
+.menu-toggle span { width:26px; height:3px; background:var(--accent1); border-radius:2px; transition:0.3s; }
+.mobile-menu { display:none; flex-direction:column; align-items:center; background:rgba(15,23,42,0.95); position:absolute; top:64px; left:0; right:0; padding:20px; gap:16px; border-top:1px solid rgba(148,163,184,0.15);}
+.mobile-menu a, .mobile-menu .mobile-link { color:var(--accent1); text-decoration:none; font-weight:600; transition:0.2s; }
+.mobile-menu a:hover, .mobile-menu .mobile-link:hover { color: var(--accent2);}
+.mobile-active { display:flex; animation:fadeIn 0.25s ease;}
+@keyframes fadeIn { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);}}
+
+/* Layout */
+.container { width:100%; max-width:1100px; margin:40px auto; padding:0 10px; display:flex; gap:36px; flex-wrap:wrap;}
+.card { background: rgba(15,23,42,0.6); padding:28px; border-radius:14px; box-shadow:0 12px 40px rgba(2,6,23,0.6);}
+.form-card { flex:1 1 520px; min-width:300px; }
+.info-card { width:360px; min-width:260px; display:flex; flex-direction:column; gap:18px; }
+
+h1.page-title { margin:0 0 8px 0; font-size:1.9rem; background:linear-gradient(90deg,var(--accent1),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+p.lead { margin:0 0 18px 0; color:#cbd5e1; line-height:1.5;}
+form label { display:block; margin-bottom:6px; font-size:0.9rem; color:var(--muted);}
+input,textarea { width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(148,163,184,0.08); background: rgba(12,17,30,0.35); color:var(--fg); font-size:0.95rem; outline:none; resize: vertical;}
+textarea{ min-height:140px;}
+.row { display:flex; gap:12px;}
+.row>div{ flex:1; }
+.btn { background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#0b1324; padding:12px 18px; border:none; border-radius:10px; font-weight:700; cursor:pointer; box-shadow:0 6px 20px rgba(99,102,241,0.3); transition:0.18s;}
+.btn.secondary { background:#334155; color:var(--fg);}
+.toast { display:none; position:fixed; right:20px; bottom:28px; background:linear-gradient(90deg,#10b981,#06b6d4); color:#052023; padding:12px 16px; border-radius:10px; box-shadow:0 8px 28px rgba(2,6,23,0.5); z-index:120; font-weight:700;}
+.contact-item { display:flex; gap:12px; align-items:center; padding:17px; background:rgba(255,255,255,0.02); border-radius:10px;}
+.contact-item strong{ color:var(--accent1);}
+.illustration { width:100%; border-radius:10px; filter:drop-shadow(0 8px 30px rgba(99,102,241,0.12));}
+
+/* Footer */
+footer { background:linear-gradient(90deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95)); border-top:1px solid rgba(148,163,184,0.15); color:#cbd5e1; padding:24px 20px; text-align:center; font-size:14px; margin-top:auto;}
+footer .copyright { font-size:12.5px; color:#94a3b8;}
+
+@media(max-width:768px){ .nav-center{display:none;} .menu-toggle{display:flex;} .nav-right{display:none;} .container{margin:20px auto; gap:18px;} .info-card{width:100%;} }
+</style>
+</head>
+<body>
+<nav>
+<div class="nav-left">Smart System</div>
+<div class="nav-center"><a href="index.html">Home</a><a href="about.html">About</a><a href="contact.html">Contact</a></div>
+<div class="nav-right"><a href="auth.html">Login</a></div>
+<div class="menu-toggle" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+<div class="mobile-menu" id="mobileMenu"><a href="index.html">Home</a><a href="about.html">About</a><a href="contact.html">Contact</a><a href="auth.html">Login</a></div>
+
+<main class="container">
+<section class="card form-card">
+<h1 class="page-title">Get in touch</h1>
+<p class="lead">Have questions or need help? Send us a message.</p>
+<form id="contactForm" action="https://formspree.io/f/xgvndjoo" method="POST">
+<div class="row"><div><label for="name">Your name</label><input id="name" name="name" type="text" required></div>
+<div><label for="email">Email</label><input id="email" name="email" type="email" required></div></div>
+<div style="margin-bottom:12px;"><label for="subject">Subject</label><input id="subject" name="subject" type="text"></div>
+<div style="margin-bottom:12px;"><label for="message">Message</label><textarea id="message" name="message" required></textarea></div>
+<div style="display:flex; gap:10px;"><button class="btn" type="submit">Send message</button><button type="reset" class="btn secondary">Reset</button></div>
+</form>
+</section>
+
+<aside class="card info-card">
+<h2>Contact details</h2>
+<div class="contact-item"><div><div class="small">Support email</div><strong>adhithyaheshan@gmail.com</strong></div></div>
+<div class="contact-item"><div><div class="small">Phone</div><strong>+94 75 955 4808</strong></div></div>
+<div class="contact-item"><div><div class="small">Address</div><strong>24/1, BAZAAR, AMBAGAMUWA, UDABULATHGAMA</strong></div></div>
+<img src="image.png" alt="Friendly compact wheeled robot with a smiling blue LED face and an articulated arm extended over a small potted plant, appearing to water or tend the plant; isolated on a plain light background with soft drop shadow; no visible text; mood cheerful and helpful" class="illustration">
+</aside>
+</main>
+
+<footer><div class="copyright">© 2025 Smart Plant Watering System Project — Powered by Firebase & AI Vision</div></footer>
+<div class="toast" id="toast">Message sent!</div>
+
+<script>
+const mobileMenu = document.getElementById("mobileMenu");
+function toggleMenu(){ mobileMenu.classList.toggle("mobile-active"); }
+
+const form = document.getElementById("contactForm");
+const toast = document.getElementById("toast");
+form.addEventListener("submit", function(e){
+    e.preventDefault();
+    const data = new FormData(form);
+    fetch(form.action,{method:"POST",body:data,headers:{'Accept':'application/json'}})
+    .then(res=>{
+        if(res.ok){ form.reset(); toast.textContent="Message sent!"; toast.style.display="block"; setTimeout(()=>toast.style.display="none",3000);}
+        else{ toast.textContent="Failed to send message"; toast.style.display="block"; setTimeout(()=>toast.style.display="none",3000);}
+    }).catch(err=>console.error(err));
+});
+</script>
+</body>
+</html>

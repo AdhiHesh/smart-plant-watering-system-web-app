@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart System Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg1: #0b1324;
+      --bg2: #111c3d;
+      --accent1: #22d3ee;
+      --accent2: #6366f1;
+      --fg: #e2e8f0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: radial-gradient(circle at 80% 20%, rgba(99,102,241,0.25), transparent 50%), 
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      color: var(--fg);
+      margin: 0;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    nav {
+      background: rgba(15,23,42,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(148,163,184,0.15);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-left {
+      font-weight: 800;
+      color: var(--fg);
+      font-size: 1.1rem;
+    }
+
+    .nav-center {
+      display: flex;
+      gap: 22px;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .nav-center a {
+      color: var(--accent1);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .nav-center a:hover {
+      color: var(--accent2);
+    }
+
+    .nav-right a {
+      color: #0b1324;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .nav-right a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(99,102,241,0.5);
+    }
+
+    /* BURGER MENU BUTTON */
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 5px;
+    }
+
+    .menu-toggle span {
+      width: 26px;
+      height: 3px;
+      background: var(--accent1);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* MOBILE MENU */
+    .mobile-menu {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(15,23,42,0.95);
+      position: absolute;
+      top: 64px;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      gap: 16px;
+      border-top: 1px solid rgba(148,163,184,0.15);
+    }
+
+    .mobile-menu a {
+      color: var(--accent1);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .mobile-menu a:hover {
+      color: var(--accent2);
+    }
+
+    .mobile-active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* HERO SECTION */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      flex-wrap: wrap;
+      gap: 40px;
+      text-align: left;
+    }
+
+    .hero-text {
+      max-width: 500px;
+      animation: fadeInUp 1.2s ease;
+    }
+
+    .hero-text h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    .hero-text p {
+      color: #cbd5e1;
+      line-height: 1.6;
+      font-size: 1.1rem;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      color: #0b1324;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(99,102,241,0.6);
+    }
+
+    .hero img {
+      width: 360px;
+      max-width: 90%;
+      animation: float 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(34,211,238,0.25));
+    }
+
+    /* FOOTER */
+    footer {
+      background: linear-gradient(90deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95));
+      border-top: 1px solid rgba(148,163,184,0.15);
+      color: #cbd5e1;
+      padding: 24px 20px;
+      text-align: center;
+      font-size: 14px;
+      margin-top: auto;
+    }
+
+    footer .copyright {
+      font-size: 12.5px;
+      color: #94a3b8;
+    }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0px); }
+    }
+
+    /* Logout Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: #0f172a;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      animation: popUp 0.3s ease;
+    }
+
+    @keyframes popUp {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal h3 {
+      color: var(--accent1);
+      margin-bottom: 10px;
+    }
+
+    .modal p {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .modal button {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 0 6px;
+    }
+
+    .confirm {
+      background: linear-gradient(90deg,#22d3ee,#6366f1);
+      color: #0b1324;
+    }
+
+    .cancel {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-center { display: none; }
+      .menu-toggle { display: flex; }
+      .nav-right { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav>
+    <div class="nav-left">Smart System</div>
+
+    <div class="nav-center" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+
+    <div class="nav-right" id="navAuth">
+      <a href="auth.html" id="loginBtn">Login</a>
+    </div>
+
+    <div class="menu-toggle" onclick="toggleMenu()"></div>
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="auth.html" id="mobileAuthLink">Login</a>
+  </div>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Smart System Control</h1>
+      <p>
+        Your intelligent assistant for modern farming — monitor soil moisture, manage irrigation robots,
+        and analyze real-time AI camera data effortlessly.
+      </p>
+      <a href="auth.html"><button class="btn">Get Started</button></a>
+    </div>
+    <img src="image.png" alt="Smart robot watering plant" />
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="copyright">
+      © 2025 Smart Plant Watering System Project — Powered by Firebase & AI Vision
+    </div>
+  </footer>
+
+  <!-- LOGOUT CONFIRM MODAL -->
+  <div class="modal" id="logoutModal">
+    <div class="modal-content">
+      <h3>Confirm Logout</h3>
+      <p>Are you sure you want to log out from Smart System?</p>
+      <button class="confirm" id="confirmLogout">Yes, Logout</button>
+      <button class="cancel" id="cancelLogout">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Firebase Authentication -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0GiwHfzycvg-cAznYMjgNvz-WYEBPxZU",
+      authDomain: "soil-moisture-data-5fcea.firebaseapp.com",
+      databaseURL: "https://soil-moisture-data-5fcea-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "soil-moisture-data-5fcea",
+      storageBucket: "soil-moisture-data-5fcea.appspot.com",
+      messagingSenderId: "236391102936",
+      appId: "1:236391102936:web:b9390b0043d1a7cf749aad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loginBtn = document.getElementById("loginBtn");
+    const navLinks = document.getElementById("navLinks");
+    const mobileAuthLink = document.getElementById("mobileAuthLink");
+    const modal = document.getElementById("logoutModal");
+    const confirmLogout = document.getElementById("confirmLogout");
+    const cancelLogout = document.getElementById("cancelLogout");
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Login state
+        loginBtn.textContent = "Logout";
+        loginBtn.href = "#";
+        loginBtn.onclick = () => modal.style.display = "flex";
+
+        mobileAuthLink.textContent = "Logout";
+        mobileAuthLink.href = "#";
+        mobileAuthLink.onclick = () => modal.style.display = "flex";
+
+        // Dashboard link add if not exists
+        if (!document.getElementById("dashLink")) {
+          const dashLink = document.createElement("a");
+          dashLink.id = "dashLink";
+          dashLink.href = "dashboard_with_camera.html";
+          dashLink.textContent = "Dashboard";
+          navLinks.appendChild(dashLink);
+        }
+      } else {
+        // Logout state
+        loginBtn.textContent = "Login";
+        loginBtn.href = "auth.html";
+        loginBtn.onclick = null;
+
+        mobileAuthLink.textContent = "Login";
+        mobileAuthLink.href = "auth.html";
+        mobileAuthLink.onclick = null;
+
+        const dash = document.getElementById("dashLink");
+        if (dash) dash.remove();
+      }
+    });
+
+    confirmLogout.onclick = async () => {
+      await signOut(auth);
+      modal.style.display = "none";
+      alert("You have successfully logged out.");
+    };
+
+    cancelLogout.onclick = () => {
+      modal.style.display = "none";
+    };
+
+    window.onclick = (e) => {
+      if (e.target === modal) modal.style.display = "none";
+    };
+  </script>
+
+  <script>
+    const mobileMenu = document.getElementById("mobileMenu");
+    const toggleMenu = () => {
+      mobileMenu.classList.toggle("mobile-active");
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Smart System | Sign Up</title>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0GiwHfzycvg-cAznYMjgNvz-WYEBPxZU",
+            authDomain: "soil-moisture-data-5fcea.firebaseapp.com",
+            databaseURL: "https://soil-moisture-data-5fcea-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "soil-moisture-data-5fcea",
+            storageBucket: "soil-moisture-data-5fcea.appspot.com",
+            messagingSenderId: "236391102936",
+            appId: "1:236391102936:web:b9390b0043d1a7cf749aad"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) window.location.href = "dashboard_with_camera.html";
+        });
+
+        window.signup = async function() {
+            const email = document.getElementById("email").value.trim();
+            const pass = document.getElementById("password").value;
+            const confirm = document.getElementById("confirm").value;
+            const msg = document.getElementById("message");
+
+            msg.textContent = "";
+            if (!email || !pass || !confirm) {
+                msg.textContent = "Please fill out all fields.";
+                return;
+            }
+            if (pass !== confirm) {
+                msg.textContent = "Passwords do not match.";
+                return;
+            }
+            if (pass.length < 6) {
+                msg.textContent = "Password should be at least 6 characters.";
+                return;
+            }
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, pass);
+                document.body.classList.add("fade-out");
+                setTimeout(() => window.location.href = "dashboard_with_camera.html", 600);
+            } catch (err) {
+                msg.textContent = err.message;
+            }
+        };
+    </script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(180deg, #0b1324, #111c3d);
+            position: relative;
+            color: #e2e8f0;
+        }
+
+        .bg-robot {
+            position: absolute;
+            inset: 0;
+            background: url("image.png") center/cover no-repeat;
+            filter: blur(25px) brightness(0.8);
+            transform: scale(1.1);
+            animation: moveBackground 18s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: scale(1.1) translateX(0) translateY(0); }
+            50% { transform: scale(1.15) translateX(-2%) translateY(-2%); }
+            100% { transform: scale(1.1) translateX(2%) translateY(2%); }
+        }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 60% 30%, rgba(99,102,241,0.18), rgba(0,0,0,0.78));
+            z-index: 1;
+        }
+
+        .home-bg {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            animation: zoomIn 1.4s ease forwards;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .home-bg h1 {
+            font-size: 2.1rem;
+            background: linear-gradient(90deg, #22d3ee, #6366f1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .home-bg p {
+            color: #cbd5e1;
+            max-width: 480px;
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        .card {
+            position: relative;
+            z-index: 3;
+            background: rgba(15, 23, 42, 0.92);
+            padding: 36px;
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+            width: 360px;
+            text-align: center;
+            animation: fadeInUp 0.9s ease;
+            backdrop-filter: blur(8px);
+        }
+        .card h2 {
+            margin: 0 0 14px 0;
+            font-size: 1.25rem;
+            background: linear-gradient(90deg, #22d3ee, #6366f1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            margin-top: 8px;
+            margin-bottom: 6px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 0;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.02);
+            color: #e2e8f0;
+            outline: none;
+            transition: box-shadow 0.15s ease, transform 0.08s ease;
+        }
+        input:focus {
+            box-shadow: 0 6px 18px rgba(99,102,241,0.12);
+            transform: translateY(-1px);
+            border-color: rgba(99,102,241,0.5);
+        }
+
+        .actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .primary {
+            padding: 12px;
+            background: linear-gradient(90deg,#22d3ee,#6366f1);
+            color: #071029;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .secondary {
+            padding: 10px;
+            background: transparent;
+            color: #cbd5e1;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .bottom {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #9aa6bf;
+        }
+
+        .link {
+            color: #a5b4fc;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .msg {
+            color: #ffb4b4;
+            min-height: 20px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(1.05); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.6s ease forwards;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; transform: scale(1.05); }
+        }
+
+        @media (max-width: 420px) {
+            .card { width: calc(100% - 36px); padding: 24px; }
+            .home-bg h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-robot" aria-hidden="true"></div>
+    <div class="overlay" aria-hidden="true"></div>
+
+    <div class="home-bg" aria-hidden="true">
+        <h1>Smart System Control</h1>
+        <p>Create an account to monitor soil sensors, control irrigation robots, and view AI camera data.</p>
+    </div>
+
+    <main class="card" role="main" aria-labelledby="signup-heading">
+        <h2 id="signup-heading">Create an account</h2>
+
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Create password" autocomplete="new-password" required />
+
+        <label for="confirm">Confirm password</label>
+        <input id="confirm" type="password" placeholder="Confirm password" autocomplete="new-password" required />
+
+        <div class="msg" id="message" role="alert" aria-live="assertive"></div>
+
+        <div class="actions">
+            <button class="primary" onclick="signup()">Sign Up</button>
+            <a class="secondary" href="auth.html" role="button">Already have an account? Log in</a>
+        </div>
+
+        <div class="bottom">By signing up you agree to the platform's <span style="color:#9aa6bf">terms</span>.</div>
+    </main>
+</body>
+</html>

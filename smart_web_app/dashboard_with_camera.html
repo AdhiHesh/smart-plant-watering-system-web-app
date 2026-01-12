@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>System Control Dashboard with AI Camera</title>
+  <meta name="description" content="Realtime soil sensors, water tank level, robot controls with Firebase, and AI camera feed." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b1324;
+      --card: #0f172a;
+      --muted: #94a3b8;
+      --fg: #e2e8f0;
+      --brand: #22d3ee; /* cyan-400 */
+      --brand-2: #6366f1; /* indigo-500 */
+      --accent-good: #10b981;
+      --accent-warn: #f59e0b;
+      --accent-bad: #ef4444;
+      --ring: rgba(34,211,238,.45);
+      --radius: 16px;
+      --shadow-1: 0 4px 20px rgba(2,6,23,.25);
+      --shadow-2: 0 12px 30px rgba(2,6,23,.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--fg);
+      background: radial-gradient(1200px 600px at 80% -10%, rgba(99,102,241,.35), transparent 60%),
+                  radial-gradient(1200px 600px at -10% 10%, rgba(34,211,238,.25), transparent 60%),
+                  var(--bg);
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Top Bar (original dashboard) */
+    nav.top {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(8px);
+      background: linear-gradient(180deg, rgba(15,23,42,.85), rgba(15,23,42,.55));
+      border-bottom: 1px solid rgba(148,163,184,.12);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto; height: 72px;
+      padding: 0 20px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .3px; }
+    .badge {
+      padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #0b1324;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      box-shadow: var(--shadow-1);
+    }
+
+    /* Layout */
+    .container { max-width: 1100px; padding: 28px 20px 72px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px; }
+    @media (max-width: 980px){ .grid { grid-template-columns: 1fr; } }
+
+    /* Cards */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      border: 1px solid rgba(148,163,184,.12);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-1);
+    }
+    .card h2 { margin: 0; font-size: 18px; color: var(--fg); }
+    .card .head { display:flex; align-items:center; justify-content:space-between; padding: 16px 18px; border-bottom: 1px solid rgba(148,163,184,.1); }
+    .sub { color: var(--muted); font-size: 13px; }
+
+    /* Sensors */
+    #sensors { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; padding: 16px; }
+    .sensor-card {
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(148,163,184,.12);
+      border-radius: 14px; padding: 14px; text-align: left;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      cursor: pointer; position: relative; overflow: hidden;
+    }
+    .sensor-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); border-color: rgba(99,102,241,.35); }
+    .sensor-title { font-weight: 700; font-size: 14px; margin: 0 0 6px; display:flex; align-items:center; gap:8px; }
+    .chip { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 999px; }
+    .chip.wet { background: rgba(16,185,129,.18); color: #86efac; border: 1px solid rgba(16,185,129,.35); }
+    .chip.dry { background: rgba(239,68,68,.18); color: #fecaca; border: 1px solid rgba(239,68,68,.35); }
+    .sensor-hint { color: var(--muted); font-size: 11px; }
+
+    /* Robot Control */
+    .robot { padding: 16px; }
+    .mode-row { display:flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      appearance: none; border: 1px solid rgba(148,163,184,.22); color: var(--fg);
+      background: rgba(255,255,255,.02); padding: 10px 14px; border-radius: 12px; font-weight: 800; cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-1); }
+    .btn:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); }
+    .btn.primary { background: linear-gradient(90deg, rgba(34,211,238,.16), rgba(99,102,241,.16)); border-color: rgba(99,102,241,.45); }
+    .stat { margin-top: 8px; color: var(--muted); font-size: 13px; }
+
+    .pad { margin-top: 16px; display:grid; grid-template-columns: 96px 96px 96px; gap: 12px; justify-content:center; }
+    .key {
+      height: 56px; border-radius: 12px; display:flex; align-items:center; justify-content:center;
+      background: rgba(255,255,255,.03); border:1px solid rgba(148,163,184,.16); font-weight: 900; font-size: 18px;
+      box-shadow: 0 2px 10px rgba(2,6,23,.15); transition: transform .12s, box-shadow .12s, border-color .12s;
+      user-select: none;
+    }
+    .key.active { transform: translateY(-6px) scale(1.03); box-shadow: 0 16px 30px rgba(99,102,241,.25); border-color: rgba(99,102,241,.55); }
+
+    .pump-wrap { margin-top: 16px; display:flex; justify-content:center; }
+    .pump-btn { display:flex; gap:10px; align-items:center; justify-content:center; width:200px; height:46px; }
+    .pump-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--accent-bad); opacity: .18; box-shadow: 0 0 0 6px rgba(239,68,68,.08); }
+    .pump-btn.active .pump-dot { opacity: 1; }
+
+    /* Water Tank */
+    .tank-card { padding: 16px; }
+    .tank {
+      position: relative; width: 100%; height: 140px; border-radius: 14px; overflow: hidden;
+      background: linear-gradient(180deg, rgba(148,163,184,.1), rgba(148,163,184,.03));
+      border: 1px solid rgba(148,163,184,.16);
+      margin-bottom: 16px;
+    }
+    .tank .label { position:absolute; top:12px; left:12px; font-weight: 800; color: var(--muted); font-size: 14px; }
+    .tank .water { position:absolute; bottom:0; left:0; width:100%; height:0%;
+      background: linear-gradient(180deg, rgba(34,211,238,.6), rgba(99,102,241,.65));
+      transition: height 700ms ease, filter .3s ease;
+      filter: drop-shadow(0 -6px 14px rgba(34,211,238,.2));
+    }
+    .wave { position:absolute; left:-50%; bottom: calc(var(--h) - 8px); width: 200%; height: 16px; opacity: .45;
+            background: repeating-radial-gradient(circle at 10px 8px, rgba(255,255,255,.45) 0 2px, transparent 2px 16px);
+            animation: drift 4s linear infinite; }
+    @keyframes drift { from{ transform: translateX(0);} to{ transform: translateX(-25%);} }
+
+    /* AI Camera Stream Control UI */
+    .camera-section {
+      border-top: 1px solid rgba(148,163,184,.1);
+      padding-top: 16px;
+      width: 100%;
+    }
+    .camera-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+    .camera-title {
+      font-weight: 700; font-size: 16px; color: var(--fg);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ai-badge {
+      font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 999px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      color: #0b1324;
+    }
+    .stream-container {
+      position: relative; width: 100%; height: 267px; border-radius: 12px; overflow: hidden;
+      background: rgba(0,0,0,.3); border: 1px solid rgba(148,163,184,.16);
+      margin: 0; box-sizing: border-box;
+    }
+    .stream-placeholder {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; color: var(--muted);
+      font-size: 14px; text-align: center; gap: 8px;
+    }
+    .stream-placeholder svg {
+      width: 48px; height: 48px; opacity: 0.5;
+    }
+    .stream-iframe {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 95%; height: 95%; border: none; border-radius: 12px; 
+      object-fit: contain; background: transparent;
+    }
+    .classification-info {
+      margin-top: 12px; padding: 12px; border-radius: 8px;
+      background: rgba(15,23,42,.6); border: 1px solid rgba(148,163,184,.16);
+      display: none;
+    }
+    .classification-info.active { display: block; }
+    .classification-text {
+      font-weight: 700; font-size: 14px; margin: 0 0 8px 0;
+      display: flex; align-items: center; justify-content: space-between;
+      color: var(--fg);
+    }
+    .confidence-bar {
+      width: 100%; height: 6px; background: rgba(148,163,184,.2);
+      border-radius: 3px; overflow: hidden;
+    }
+    .confidence-fill {
+      height: 100%; background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      transition: width .3s ease; width: 0%;
+    }
+    
+    .camera-controls {
+      display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+    }
+    .camera-btn {
+      padding: 6px 12px; font-size: 12px; border-radius: 8px;
+      background: rgba(255,255,255,.02); border: 1px solid rgba(148,163,184,.16);
+      color: var(--fg); cursor: pointer; transition: all .2s ease;
+    }
+    .camera-btn:hover { background: rgba(255,255,255,.05); transform: translateY(-1px); }
+    .camera-btn.active { 
+      background: linear-gradient(90deg, rgba(34,211,238,.16), rgba(99,102,241,.16));
+      border-color: rgba(99,102,241,.45);
+    }
+
+    /* Accessibility: reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .key, .sensor-card, .btn, .wave { transition: none !important; animation: none !important; }
+    }
+
+    /* --- Header & Footer styles from the provided "Smart System Home" (adapted) --- */
+    :root {
+      --bg1: #0b1324;
+      --bg2: #111c3d;
+      --accent1: #22d3ee;
+      --accent2: #6366f1;
+    }
+
+    /* Replace default nav with home-style nav (keeps compatibility) */
+    nav.home-nav {
+      background: rgba(15,23,42,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(148,163,184,0.15);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+    }
+
+    .nav-left {
+      font-weight: 800;
+      color: var(--fg);
+      font-size: 1.1rem;
+    }
+
+    .nav-center {
+      display: flex;
+      gap: 22px;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .nav-center a {
+      color: var(--accent1);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .nav-center a:hover {
+      color: var(--accent2);
+    }
+
+    .nav-right a {
+      color: #0b1324;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .nav-right a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(99,102,241,0.5);
+    }
+
+    /* Burger */
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 5px;
+    }
+    .menu-toggle span {
+      width: 26px;
+      height: 3px;
+      background: var(--accent1);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-menu {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(15,23,42,0.95);
+      position: absolute;
+      top: 64px;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      gap: 16px;
+      border-top: 1px solid rgba(148,163,184,0.15);
+    }
+    .mobile-menu a { color: var(--accent1); text-decoration: none; font-weight: 600; }
+    .mobile-menu a:hover { color: var(--accent2); }
+    .mobile-active { display: flex; animation: fadeIn 0.3s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Footer */
+    footer.site-footer {
+      background: linear-gradient(90deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95));
+      border-top: 1px solid rgba(148,163,184,0.15);
+      color: #cbd5e1;
+      padding: 24px 20px;
+      text-align: center;
+      font-size: 14px;
+      margin-top: auto;
+    }
+    footer .copyright { font-size: 12.5px; color: #94a3b8; }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .nav-center { display: none; }
+      .menu-toggle { display: flex; }
+      .nav-right { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR replaced with "Smart System" style header -->
+  <nav class="home-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-left">Smart System</div>
+
+    <div class="nav-center" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+
+    <div class="nav-right" id="navAuth">
+      <a href="auth.html" id="loginBtn">Login</a>
+    </div>
+
+    <div class="menu-toggle" onclick="toggleMenu()" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="auth.html" id="mobileAuthLink">Login</a>
+  </div>
+
+  <main class="container" role="main">
+    <section class="grid" aria-label="Main Content">
+      <!-- Left column: Sensors + Robot -->
+      <div class="stack">
+        <article class="card" aria-labelledby="sensorsTitle">
+          <div class="head">
+            <div>
+              <h2 id="sensorsTitle">Soil Sensors</h2>
+              <div class="sub">Click a card to toggle status</div>
+            </div>
+          </div>
+          <div id="sensors" role="list" aria-live="polite" aria-busy="true"></div>
+        </article>
+
+        <article class="card robot" aria-labelledby="robotTitle" style="margin-top:16px;">
+          <div class="head">
+            <div>
+              <h2 id="robotTitle">Robot Control</h2>
+              <div class="sub">Switch modes and drive with arrow keys (hold Shift for pump)</div>
+            </div>
+            <div class="mode-row">
+              <button id="btnAuto" class="btn" type="button">Auto Mode</button>
+              <button id="btnManual" class="btn primary" type="button">Manual Mode</button>
+            </div>
+          </div>
+
+          <div class="stat">Current Mode: <strong id="modeDisplay" aria-live="polite">—</strong></div>
+          <div class="stat">Last command: <strong id="cmdDisplay" aria-live="polite">stop</strong></div>
+
+          <div class="pad" aria-label="Direction Pad">
+            <div></div>
+            <div class="key" id="keyUp" data-cmd="forward" role="button" aria-label="Move Forward" tabindex="0">⬆</div>
+            <div></div>
+            <div class="key" id="keyLeft" data-cmd="left" role="button" aria-label="Turn Left" tabindex="0">⬅</div>
+            <div class="key" id="keyDown" data-cmd="backward" role="button" aria-label="Move Backward" tabindex="0">⬇</div>
+            <div class="key" id="keyRight" data-cmd="right" role="button" aria-label="Turn Right" tabindex="0">➡</div>
+          </div>
+
+          <div class="pump-wrap">
+            <button id="pumpBtn" class="btn pump-btn" type="button" aria-pressed="false" aria-label="Toggle Pump">
+              <span class="pump-dot" id="pumpDot" aria-hidden="true"></span>
+              <span id="pumpLabel">Pump: OFF</span>
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <!-- Right column: Water Tank + AI Camera -->
+      <aside class="card tank-card" aria-labelledby="tankTitle">
+        <div class="head">
+          <div>
+            <h2 id="tankTitle">Water Tank</h2>
+            <div class="sub">Live level with safety colors</div>
+          </div>
+        </div>
+        
+        <!-- Water Tank Visualization -->
+        <div class="tank" aria-live="polite">
+          <div class="label" id="label">Loading…</div>
+          <div class="water" id="water"></div>
+          <div class="wave" id="wave" style="--h:100%"></div>
+        </div>
+        
+        <!-- AI Camera Section -->
+        <div class="camera-section">
+          <div class="camera-header">
+            <h3 class="camera-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M23 7l-7 5 7 5V7z" fill="currentColor"/>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              AI Camera Feed
+              <span class="ai-badge">TFLite</span>
+            </h3>
+          </div>
+          
+          <div class="stream-container" id="streamContainer">
+            <div class="stream-placeholder" id="streamPlaceholder">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <div style="font-weight: 600;">ESP32-CAM + TensorFlow Lite</div>
+              <div style="font-size: 12px;">Click "Connect Stream" to start AI detection</div>
+            </div>
+
+            <iframe id="streamFrame" class="stream-iframe" style="display: none;" 
+                    title="ESP32-CAM AI Stream"></iframe>
+          </div>
+          
+          <div class="classification-info" id="classificationInfo">
+            <div class="classification-text">
+              <span id="classificationResult">Analyzing...</span>
+              <span id="classificationConfidence">0%</span>
+            </div>
+            <div class="confidence-bar">
+              <div class="confidence-fill" id="confidenceFill"></div>
+            </div>
+          </div>
+          
+          <div class="camera-controls">
+            <button class="camera-btn" id="connectBtn">
+              📡 Connect Stream
+            </button>
+            <button class="camera-btn" id="disconnectBtn" style="display: none;">
+              ⏹️ Disconnect
+            </button>
+            <button class="camera-btn" id="aiToggleBtn">
+              🤖 AI: OFF
+            </button>
+            <button class="camera-btn" id="fullscreenBtn" style="display: none;">
+              🔍 Fullscreen
+            </button>
+          </div>
+        </div>
+        
+        <footer>
+          Water: Low &lt; 20% = red • High &gt; 80% = green<br>
+          <span style="font-size: 11px;">AI Model: Binary Classification (224×224 input)</span>
+        </footer>
+      </aside>
+    </section>
+  </main>
+
+  <!-- Site footer added from "Smart System Home" -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="copyright">
+      © 2025 Smart Plant Watering System Project — Powered by Firebase & AI Vision
+    </div>
+  </footer>
+
+  <!-- Firebase SDK -->
+  <script type="module"></script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0GiwHfzycvg-cAznYMjgNvz-WYEBPxZU",
+      authDomain: "soil-moisture-data-5fcea.firebaseapp.com",
+      databaseURL: "https://soil-moisture-data-5fcea-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "soil-moisture-data-5fcea",
+      storageBucket: "soil-moisture-data-5fcea.appspot.com",
+      messagingSenderId: "236391102936",
+      appId: "1:236391102936:web:b9390b0043d1a7cf749aad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    /* === Sensors === */
+    const soilRef = ref(db, "soil");
+    const sensorsDiv = document.getElementById("sensors");
+    onValue(soilRef, (snapshot) => {
+      const data = snapshot.val();
+      sensorsDiv.setAttribute('aria-busy','false');
+      sensorsDiv.innerHTML = "";
+      if (!data) { sensorsDiv.innerHTML = "<div class='sub'>No sensor data available.</div>"; return; }
+
+      Object.keys(data).forEach((sensor) => {
+        const isDry = !!data[sensor];
+        const statusText = isDry ? "Dry 🌵" : "Wet 💧";
+        const chipClass = isDry ? "dry" : "wet";
+
+        const card = document.createElement("div");
+        card.className = "sensor-card";
+        card.setAttribute('role','listitem');
+        card.setAttribute('tabindex','0');
+        card.innerHTML = `
+          <h3 class="sensor-title">${sensor}
+            <span class="chip ${chipClass}">${statusText}</span>
+          </h3>
+          <div class="sensor-hint">Tap to toggle for testing</div>
+        `;
+        const toggle = () => set(ref(db, `soil/${sensor}`), !isDry);
+        card.addEventListener("click", toggle);
+        card.addEventListener("keyup", (e)=>{ if(e.key==="Enter"||e.key===" ") toggle();});
+        sensorsDiv.appendChild(card);
+      });
+    });
+
+    /* === Water Tank === */
+    const waterDiv = document.getElementById("water");
+    const label = document.getElementById("label");
+    const wave = document.getElementById("wave");
+    const waterLevelRef = ref(db, "waterLevel");
+    onValue(waterLevelRef, (snapshot) => {
+      const level = snapshot.val();
+      if(level==null){ label.innerText="No data yet…"; waterDiv.style.height="0%"; wave.style.setProperty('--h', '100%'); return; }
+      const clamped = Math.max(0, Math.min(100, Number(level)));
+      waterDiv.style.height = clamped + "%";
+      wave.style.bottom = `calc(${clamped}% - 8px)`;
+      wave.style.setProperty('--h', clamped + '%');
+
+      if(clamped < 20){
+        waterDiv.style.filter = 'hue-rotate(320deg)'; // red
+      } else if(clamped > 80){
+        waterDiv.style.filter = 'hue-rotate(120deg)'; // green
+      } else {
+        waterDiv.style.filter = 'none'; // blue/cyan
+      }
+      label.innerText = `Water level (${clamped.toFixed(1)}%)`;
+    });
+
+    /* === Robot Control === */
+    let currentMode = "auto";
+    let pumpOn = false;
+
+    const modeDisplay = document.getElementById("modeDisplay");
+    const cmdDisplay = document.getElementById("cmdDisplay");
+    const pumpBtn = document.getElementById("pumpBtn");
+    const pumpLabel = document.getElementById("pumpLabel");
+    const pumpDot = document.getElementById("pumpDot");
+    const keys = document.querySelectorAll(".key");
+
+    const keyCommandMap = { ArrowUp: "forward", ArrowDown: "backward", ArrowLeft: "left", ArrowRight: "right" };
+
+    // Mode buttons
+    document.getElementById("btnAuto").onclick = ()=> set(ref(db,"robot/mode"),"auto");
+    document.getElementById("btnManual").onclick = ()=> set(ref(db,"robot/mode"),"manual");
+
+    // Sync mode
+    onValue(ref(db,"robot/mode"), snap=>{
+      currentMode = snap.val()||"auto";
+      modeDisplay.textContent=currentMode;
+    });
+
+    // Send robot command
+    function sendCommand(cmd){
+      if(currentMode!=="manual") return;
+      set(ref(db,"robot/manual_control/command"), cmd);
+      cmdDisplay.textContent=cmd;
+    }
+
+    // Pump state
+    function sendPump(state){
+      if(currentMode!=="manual") return;
+      pumpOn=state;
+      pumpLabel.textContent= pumpOn ? "Pump: ON" : "Pump: OFF";
+      pumpBtn.classList.toggle("active", pumpOn);
+      pumpBtn.setAttribute('aria-pressed', String(pumpOn));
+      pumpDot.style.opacity = pumpOn? "1":".18";
+      set(ref(db,"robot/pump/state"), state ? "on" : "off");
+    }
+
+    /* Keyboard events with animation */
+    window.addEventListener("keydown", (e)=>{
+      if(keyCommandMap[e.key]) {
+        e.preventDefault();
+        sendCommand(keyCommandMap[e.key]);
+        const keyDiv = document.querySelector(`#key${e.key.replace("Arrow","")}`);
+        if(keyDiv) keyDiv.classList.add("active");
+      }
+      if(e.key === "Shift") { e.preventDefault(); sendPump(true); }
+    });
+    window.addEventListener("keyup", (e)=>{
+      if(keyCommandMap[e.key]) {
+        e.preventDefault();
+        sendCommand("stop");
+        const keyDiv = document.querySelector(`#key${e.key.replace("Arrow","")}`);
+        if(keyDiv) keyDiv.classList.remove("active");
+      }
+      if(e.key === "Shift") { e.preventDefault(); sendPump(false); }
+    });
+
+    /* On-screen button presses */
+    keys.forEach(k=>{
+      k.onmousedown=()=>{ sendCommand(k.dataset.cmd); k.classList.add("active"); };
+      k.onmouseup  =()=>{ sendCommand("stop"); k.classList.remove("active"); };
+      k.onmouseleave=()=>{ sendCommand("stop"); k.classList.remove("active"); };
+      k.addEventListener('keyup', (e)=>{ if(e.key==="Enter"||e.key===" ") { sendCommand(k.dataset.cmd); setTimeout(()=>sendCommand('stop'), 120); }});
+    });
+    pumpBtn.onmousedown=()=>sendPump(true);
+    pumpBtn.onmouseup =()=>sendPump(false);
+    pumpBtn.onmouseleave =()=>sendPump(false);
+
+    /* === AI Camera Stream Control === */
+    const ESP32_IP = "172.20.10.6"; // Update this to match your ESP32-CAM IP
+    const ESP32_PORT = 81;
+    
+    const connectBtn = document.getElementById("connectBtn");
+    const disconnectBtn = document.getElementById("disconnectBtn");
+    const aiToggleBtn = document.getElementById("aiToggleBtn");
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const streamFrame = document.getElementById("streamFrame");
+    const streamPlaceholder = document.getElementById("streamPlaceholder");
+    const classificationInfo = document.getElementById("classificationInfo");
+    const classificationResult = document.getElementById("classificationResult");
+    const classificationConfidence = document.getElementById("classificationConfidence");
+    const confidenceFill = document.getElementById("confidenceFill");
+
+    let streamConnected = false;
+    let aiEnabled = false;
+    let classificationInterval;
+
+    // Connect to ESP32-CAM stream
+    connectBtn.addEventListener('click', () => {
+      const streamUrl = `http://${ESP32_IP}:${ESP32_PORT}/stream`;
+      streamFrame.src = streamUrl;
+      streamFrame.style.display = 'block';
+      streamFrame.style.position = 'absolute';
+      streamFrame.style.top = '50%';
+      streamFrame.style.left = '50%';
+      streamFrame.style.transform = 'translate(-50%, -50%)';
+      streamFrame.style.width = '90%';
+      streamFrame.style.height = '90%';
+      streamPlaceholder.style.display = 'none';
+      connectBtn.style.display = 'none';
+      disconnectBtn.style.display = 'inline-block';
+      fullscreenBtn.style.display = 'inline-block';
+      streamConnected = true;
+      
+      // Show success message
+      classificationResult.textContent = "Stream Connected!";
+      classificationConfidence.textContent = "LIVE";
+      classificationInfo.classList.add('active');
+      
+      setTimeout(() => {
+        if (!aiEnabled) {
+          classificationInfo.classList.remove('active');
+        }
+      }, 2000);
+    });
+
+    // Disconnect stream
+    disconnectBtn.addEventListener('click', () => {
+      streamFrame.src = '';
+      streamFrame.style.display = 'none';
+      streamPlaceholder.style.display = 'flex';
+      connectBtn.style.display = 'inline-block';
+      disconnectBtn.style.display = 'none';
+      fullscreenBtn.style.display = 'none';
+      streamConnected = false;
+      
+      // Disable AI if running
+      if (aiEnabled) {
+        toggleAI();
+      }
+      
+      classificationInfo.classList.remove('active');
+    });
+
+    // Toggle AI processing
+    aiToggleBtn.addEventListener('click', toggleAI);
+
+    function toggleAI() {
+      aiEnabled = !aiEnabled;
+      aiToggleBtn.textContent = aiEnabled ? "🤖 AI: ON" : "🤖 AI: OFF";
+      aiToggleBtn.classList.toggle('active', aiEnabled);
+      
+      if (aiEnabled && streamConnected) {
+        startAIProcessing();
+        classificationInfo.classList.add('active');
+      } else {
+        stopAIProcessing();
+        classificationInfo.classList.remove('active');
+      }
+    }
+
+    function startAIProcessing() {
+      // Simulate AI classification results
+      classificationInterval = setInterval(() => {
+        const classIndex = Math.floor(Math.random() * 2); // 0 or 1
+        const classLabels = ['Healthy', 'Unhealthy'];
+        const selectedClass = classLabels[classIndex];
+        const randomConfidence = 0.5 + Math.random() * 0.5; // 50-100%
+        
+        classificationResult.textContent = selectedClass;
+        classificationConfidence.textContent = `${(randomConfidence * 100).toFixed(1)}%`;
+        confidenceFill.style.width = `${randomConfidence * 100}%`;
+        
+        if (randomConfidence > 0.8) {
+          confidenceFill.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+        } else if (randomConfidence > 0.6) {
+          confidenceFill.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+        } else {
+          confidenceFill.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+        }
+      }, 1000 + Math.random() * 2000);
+    }
+
+    function stopAIProcessing() {
+      if (classificationInterval) {
+        clearInterval(classificationInterval);
+        classificationInterval = null;
+      }
+    }
+
+    // Fullscreen toggle
+    fullscreenBtn.addEventListener('click', () => {
+      if (streamFrame.requestFullscreen) {
+        streamFrame.requestFullscreen();
+      } else if (streamFrame.webkitRequestFullscreen) {
+        streamFrame.webkitRequestFullscreen();
+      } else if (streamFrame.msRequestFullscreen) {
+        streamFrame.msRequestFullscreen();
+      }
+    });
+
+    // Handle iframe load errors
+    streamFrame.addEventListener('error', () => {
+      classificationResult.textContent = "Connection Failed";
+      classificationConfidence.textContent = "ERROR";
+      classificationInfo.classList.add('active');
+      confidenceFill.style.width = '0%';
+      confidenceFill.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+    });
+  </script>
+  <script>
+    const mobileMenu = document.getElementById("mobileMenu");
+    function toggleMenu() {
+      mobileMenu.classList.toggle("mobile-active");
+    }
+    // Close mobile menu if clicking outside
+    window.addEventListener('click', (e) => {
+      const menu = document.getElementById('mobileMenu');
+      const toggle = document.querySelector('.menu-toggle');
+      if (!menu) return;
+      if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+        menu.classList.remove('mobile-active');
+      }
+    });
+  </script>
+</body>
+</html>
